@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Should Cari Make?</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .subtitle { font-size: 1.1em; opacity: 0.9; }
+        .content { padding: 30px; }
+        .button-container { text-align: center; margin-bottom: 30px; }
+        #generateBtn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        #generateBtn:hover { transform: translateY(-2px); }
+        #dishDisplay { display: none; animation: fadeIn 0.5s; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .dish-name { font-size: 2em; color: #333; margin-bottom: 15px; text-align: center; }
+        .cuisine-tag {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .american { background: #e3f2fd; color: #1976d2; }
+        .mexican { background: #fff3e0; color: #f57c00; }
+        .asian { background: #f3e5f5; color: #7b1fa2; }
+        .dish-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .section { margin-bottom: 25px; }
+        .section-title {
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .section-title::before { content: "🔸"; margin-right: 10px; }
+        .ingredients-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .ingredients-list li { margin-bottom: 8px; line-height: 1.6; }
+        .instructions { line-height: 1.8; color: #555; }
+        .instructions ol { padding-left: 20px; }
+        .instructions li { margin-bottom: 12px; }
+        .rating-section {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .stars { font-size: 2em; margin: 15px 0; }
+        .star { cursor: pointer; color: #ddd; transition: color 0.2s; }
+        .star:hover, .star.active { color: #ffd700; }
+        .rating-display { margin-top: 15px; font-size: 1.1em; color: #555; }
+        .rating-count { font-size: 0.9em; color: #777; }
+        #printBtn {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+            margin-top: 20px;
+        }
+        #printBtn:hover { transform: translateY(-2px); }
+        @media print {
+            body { background: white; padding: 0; }
+            header, .button-container, .rating-section, #printBtn { display: none; }
+            .container { box-shadow: none; border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍳 What Should Cari Make? 🍳</h1>
+            <p class="subtitle">Discover delicious traditional dishes!</p>
+            <p class="subtitle" style="margin-top: 10px;">✨ 105 Recipes from American, Mexican & Asian cuisines ✨</p>
+        </header>
+        
+        <div class="content">
+            <div class="button-container">
+                <button id="generateBtn">🎲 Surprise Me!</button>
+            </div>
+            
+            <div id="dishDisplay">
+                <div style="text-align: center;">
+                    <span class="cuisine-tag" id="cuisineTag"></span>
+                </div>
+                <h2 class="dish-name" id="dishName"></h2>
+                <img class="dish-image" id="dishImage" alt="Dish image">
+                <div class="section">
+                    <h3 class="section-title">Ingredients</h3>
+                    <div class="ingredients-list">
+                        <ul id="ingredientsList"></ul>
+                    </div>
+                </div>
+                <div class="section">
+                    <h3 class="section-title">Instructions</h3>
+                    <div class="instructions">
+                        <ol id="instructionsList"></ol>
+                    </div>
+                </div>
+                <div class="section">
+                    <div class="rating-section">
+                        <h3>Rate This Dish</h3>
+                        <div class="stars" id="starRating">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                        <div class="rating-display" id="ratingDisplay">Click stars to rate</div>
+                        <div class="rating-count" id="ratingCount"></div>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button id="printBtn">🖨️ Print Recipe</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+
+const dishes = [
+  {
+    name: "Classic Mac and Cheese",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['1 lb elbow macaroni', '4 tablespoons butter', '4 tablespoons flour', '3 cups milk', '3 cups shredded cheddar cheese', 'Salt, pepper, garlic powder'],
+    instructions: ['Cook macaroni according to package', 'Melt butter, add flour to make roux', 'Gradually add milk while whisking', 'Stir in cheese until melted', 'Mix with macaroni and serve']
+  },
+  {
+    name: "Southern Fried Chicken",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['8 chicken pieces', '2 cups buttermilk', '2 cups flour', 'Paprika, garlic powder, cayenne', 'Salt and pepper', 'Oil for frying'],
+    instructions: ['Soak chicken in buttermilk 2+ hours', 'Mix flour with spices', 'Coat chicken in seasoned flour', 'Fry in 350°F oil until golden', 'Drain and rest before serving']
+  },
+  {
+    name: "Classic Meatloaf",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['2 lbs ground beef', '1 cup breadcrumbs', '2 eggs', '1 onion diced', '1/2 cup ketchup', 'Worcestershire sauce'],
+    instructions: ['Preheat oven to 350°F', 'Mix all ingredients', 'Shape into loaf', 'Top with ketchup', 'Bake 1 hour']
+  },
+  {
+    name: "BBQ Ribs",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['2 racks baby back ribs', 'BBQ rub spices', '1 cup BBQ sauce'],
+    instructions: ['Rub ribs with spice mix', 'Wrap in foil', 'Bake at 300°F for 2.5 hours', 'Brush with sauce and broil']
+  },
+  {
+    name: "Chicken Pot Pie",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['2 pie crusts', '2 cups cooked chicken', 'Mixed vegetables', 'Cream sauce'],
+    instructions: ['Make cream sauce', 'Mix chicken and veggies', 'Pour in pie crust', 'Cover and bake at 425°F for 30 min']
+  },
+  {
+    name: "Pulled Pork",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['4 lb pork shoulder', 'BBQ rub', 'BBQ sauce', 'Buns'],
+    instructions: ['Rub pork with spices', 'Slow cook 8-10 hours', 'Shred and mix with sauce', 'Serve on buns']
+  },
+  {
+    name: "Tuna Casserole",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Egg noodles', '2 cans tuna', 'Cream of mushroom soup', 'Peas', 'Cheese', 'Potato chips'],
+    instructions: ['Cook noodles', 'Mix with tuna, soup, peas, cheese', 'Top with crushed chips', 'Bake at 350°F for 25 min']
+  },
+  {
+    name: "Biscuits and Gravy",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Refrigerated biscuits', '1 lb sausage', 'Flour', 'Milk', 'Pepper'],
+    instructions: ['Bake biscuits', 'Brown sausage', 'Add flour then milk for gravy', 'Season and serve over biscuits']
+  },
+  {
+    name: "Chili",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['2 lbs ground beef', 'Beans', 'Tomatoes', 'Chili powder', 'Cumin'],
+    instructions: ['Brown beef', 'Add beans, tomatoes, spices', 'Simmer 30 minutes', 'Serve with toppings']
+  },
+  {
+    name: "Cornbread",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Cornmeal', 'Flour', 'Sugar', 'Baking powder', 'Milk', 'Egg', 'Oil'],
+    instructions: ['Mix dry ingredients', 'Whisk wet ingredients', 'Combine and bake at 400°F for 20 min']
+  },
+  {
+    name: "Mashed Potatoes",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['5 lbs potatoes', 'Butter', 'Milk', 'Sour cream', 'Salt and pepper'],
+    instructions: ['Boil potatoes until tender', 'Drain and mash', 'Add butter, milk, sour cream', 'Season to taste']
+  },
+  {
+    name: "Grilled Cheese",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Bread', 'Butter', 'Cheese slices'],
+    instructions: ['Butter bread', 'Place cheese between slices', 'Grill until golden on both sides']
+  },
+  {
+    name: "Chicken Noodle Soup",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Chicken', 'Carrots', 'Celery', 'Onion', 'Noodles', 'Broth'],
+    instructions: ['Sauté vegetables', 'Add broth and chicken', 'Add noodles and cook until tender']
+  },
+  {
+    name: "Pancakes",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Flour', 'Sugar', 'Baking powder', 'Milk', 'Egg', 'Butter'],
+    instructions: ['Mix dry ingredients', 'Whisk in wet ingredients', 'Cook on griddle', 'Serve with syrup']
+  },
+  {
+    name: "Coleslaw",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Cabbage', 'Carrot', 'Mayonnaise', 'Vinegar', 'Sugar'],
+    instructions: ['Shred cabbage and carrot', 'Mix dressing', 'Toss and refrigerate']
+  },
+  {
+    name: "Buffalo Wings",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Chicken wings', 'Hot sauce', 'Butter', 'Oil for frying'],
+    instructions: ['Fry wings until crispy', 'Toss in hot sauce and butter mix', 'Serve with blue cheese']
+  },
+  {
+    name: "Potato Salad",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Potatoes', 'Eggs', 'Mayonnaise', 'Mustard', 'Celery', 'Onion'],
+    instructions: ['Boil potatoes and eggs', 'Chop all ingredients', 'Mix with mayo and mustard', 'Refrigerate']
+  },
+  {
+    name: "Sloppy Joes",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Ground beef', 'Onion', 'Ketchup', 'Brown sugar', 'Worcestershire', 'Buns'],
+    instructions: ['Brown beef and onion', 'Add sauce ingredients', 'Simmer', 'Serve on buns']
+  },
+  {
+    name: "Baked Beans",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Canned beans', 'Bacon', 'Onion', 'Brown sugar', 'Ketchup', 'Molasses'],
+    instructions: ['Cook bacon and onion', 'Mix with beans and sauces', 'Bake at 350°F for 45 min']
+  },
+  {
+    name: "Apple Pie",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Pie crusts', 'Apples', 'Sugar', 'Cinnamon', 'Butter'],
+    instructions: ['Mix apples with sugar and cinnamon', 'Fill crust', 'Top and seal', 'Bake at 425°F for 45 min']
+  },
+  {
+    name: "Chocolate Chip Cookies",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Flour', 'Butter', 'Sugar', 'Brown sugar', 'Eggs', 'Chocolate chips'],
+    instructions: ['Cream butter and sugars', 'Add eggs', 'Mix in flour', 'Fold in chips', 'Bake at 375°F for 10 min']
+  },
+  {
+    name: "Pot Roast",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Beef chuck roast', 'Carrots', 'Potatoes', 'Onion', 'Beef broth'],
+    instructions: ['Brown roast', 'Add vegetables and broth', 'Bake at 325°F for 3-4 hours']
+  },
+  {
+    name: "Deviled Eggs",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Hard-boiled eggs', 'Mayonnaise', 'Mustard', 'Paprika'],
+    instructions: ['Halve eggs and remove yolks', 'Mix yolks with mayo and mustard', 'Pipe back into whites', 'Sprinkle paprika']
+  },
+  {
+    name: "Clam Chowder",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Bacon', 'Onion', 'Potatoes', 'Clams', 'Cream', 'Broth'],
+    instructions: ['Cook bacon', 'Sauté onion', 'Add potatoes and broth', 'Add clams and cream', 'Simmer']
+  },
+  {
+    name: "Corn on the Cob",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Fresh corn', 'Butter', 'Salt'],
+    instructions: ['Boil corn 4-5 minutes', 'Butter and salt', 'Serve hot']
+  },
+  {
+    name: "Green Bean Casserole",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Green beans', 'Cream of mushroom soup', 'Milk', 'Cheese', 'Fried onions'],
+    instructions: ['Mix beans, soup, milk, cheese', 'Bake at 350°F for 25 min', 'Top with onions', 'Bake 5 more min']
+  },
+  {
+    name: "Tater Tot Hotdish",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Ground beef', 'Cream of mushroom soup', 'Vegetables', 'Cheese', 'Tater tots'],
+    instructions: ['Brown beef', 'Mix with soup and vegetables', 'Top with cheese and tater tots', 'Bake at 350°F for 45 min']
+  },
+  {
+    name: "Jambalaya",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Sausage', 'Chicken', 'Rice', 'Vegetables', 'Cajun seasoning', 'Broth'],
+    instructions: ['Brown meats', 'Sauté vegetables', 'Add rice, broth, seasoning', 'Simmer 20-25 min']
+  },
+  {
+    name: "Shrimp Scampi",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Shrimp', 'Pasta', 'Butter', 'Garlic', 'White wine', 'Lemon'],
+    instructions: ['Cook pasta', 'Sauté shrimp in garlic butter', 'Add wine and lemon', 'Toss with pasta']
+  },
+  {
+    name: "Philly Cheesesteak",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Ribeye steak', 'Onion', 'Peppers', 'Provolone cheese', 'Hoagie rolls'],
+    instructions: ['Sauté steak', 'Cook vegetables', 'Combine and top with cheese', 'Serve on rolls']
+  },
+  {
+    name: "Cobb Salad",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Greens', 'Chicken', 'Eggs', 'Bacon', 'Avocado', 'Tomatoes', 'Blue cheese'],
+    instructions: ['Arrange all ingredients on greens', 'Serve with dressing']
+  },
+  {
+    name: "Salisbury Steak",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Ground beef', 'Breadcrumbs', 'Egg', 'Mushrooms', 'Onion', 'Gravy'],
+    instructions: ['Form beef patties', 'Brown in skillet', 'Make mushroom gravy', 'Simmer patties in gravy']
+  },
+  {
+    name: "Shepherd's Pie",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Ground beef', 'Vegetables', 'Mashed potatoes', 'Cheese'],
+    instructions: ['Brown beef with vegetables', 'Top with mashed potatoes and cheese', 'Bake at 375°F for 25 min']
+  },
+  {
+    name: "Gumbo",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Roux', 'Sausage', 'Chicken', 'Vegetables', 'Broth', 'Seasonings', 'Rice'],
+    instructions: ['Make dark roux', 'Add vegetables', 'Add meat and broth', 'Simmer 45 min', 'Serve over rice']
+  },
+  {
+    name: "Chicken and Dumplings",
+    cuisine: "american",
+    image: "https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=American+Cuisine",
+    ingredients: ['Chicken', 'Broth', 'Vegetables', 'Dumpling dough'],
+    instructions: ['Simmer chicken in broth', 'Add vegetables', 'Drop dumpling dough', 'Cook 15 min covered']
+  },
+  {
+    name: "Chicken Tacos",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Chicken', 'Taco seasoning', 'Tortillas', 'Lettuce', 'Tomato', 'Cheese', 'Sour cream'],
+    instructions: ['Cook chicken with seasoning', 'Warm tortillas', 'Fill with chicken and toppings']
+  },
+  {
+    name: "Cheese Quesadillas",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Flour tortillas', 'Shredded cheese', 'Butter'],
+    instructions: ['Place cheese on tortilla', 'Fold in half', 'Cook until golden and cheese melts']
+  },
+  {
+    name: "Beef Enchiladas",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Ground beef', 'Enchilada sauce', 'Tortillas', 'Cheese'],
+    instructions: ['Brown beef', 'Roll in tortillas', 'Cover with sauce and cheese', 'Bake at 350°F for 20 min']
+  },
+  {
+    name: "Guacamole",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Avocados', 'Lime', 'Onion', 'Tomato', 'Cilantro', 'Salt'],
+    instructions: ['Mash avocados', 'Mix in all ingredients', 'Serve with chips']
+  },
+  {
+    name: "Chicken Fajitas",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Chicken', 'Bell peppers', 'Onion', 'Fajita seasoning', 'Tortillas'],
+    instructions: ['Cook chicken with seasoning', 'Sauté peppers and onions', 'Serve in tortillas']
+  },
+  {
+    name: "Refried Beans",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Pinto beans', 'Lard or oil', 'Onion', 'Garlic', 'Cumin'],
+    instructions: ['Sauté onion and garlic', 'Add beans and mash', 'Cook until creamy']
+  },
+  {
+    name: "Carnitas",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Pork shoulder', 'Orange juice', 'Garlic', 'Cumin', 'Oregano'],
+    instructions: ['Simmer pork 2-3 hours', 'Shred', 'Broil for crispy edges', 'Serve in tortillas']
+  },
+  {
+    name: "Mexican Rice",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Rice', 'Tomato sauce', 'Broth', 'Onion', 'Garlic', 'Cumin'],
+    instructions: ['Toast rice in oil', 'Add liquids and seasonings', 'Simmer 20 min covered']
+  },
+  {
+    name: "Chicken Enchiladas Verdes",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Chicken', 'Salsa verde', 'Tortillas', 'Cheese', 'Sour cream'],
+    instructions: ['Mix chicken with salsa and sour cream', 'Roll in tortillas', 'Top with more salsa and cheese', 'Bake']
+  },
+  {
+    name: "Carne Asada",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Flank steak', 'Lime', 'Orange juice', 'Garlic', 'Cumin'],
+    instructions: ['Marinate steak overnight', 'Grill 5-7 min per side', 'Slice and serve']
+  },
+  {
+    name: "Chile Rellenos",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Poblano peppers', 'Cheese', 'Eggs', 'Flour', 'Tomato sauce'],
+    instructions: ['Roast and peel peppers', 'Stuff with cheese', 'Dip in egg batter', 'Fry', 'Serve with sauce']
+  },
+  {
+    name: "Pozole",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Pork', 'Hominy', 'Broth', 'Chili powder', 'Oregano'],
+    instructions: ['Simmer pork 2 hours', 'Add hominy', 'Cook 30 more min', 'Serve with toppings']
+  },
+  {
+    name: "Tamales",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Masa', 'Lard', 'Meat filling', 'Chile sauce', 'Corn husks'],
+    instructions: ['Beat lard with masa', 'Spread on husks', 'Add filling', 'Fold', 'Steam 1-1.5 hours']
+  },
+  {
+    name: "Elote",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Corn', 'Mayo', 'Sour cream', 'Cotija cheese', 'Chili powder', 'Lime'],
+    instructions: ['Grill corn', 'Coat with mayo mix', 'Roll in cheese', 'Sprinkle chili powder']
+  },
+  {
+    name: "Sopes",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Masa', 'Refried beans', 'Lettuce', 'Cheese', 'Sour cream', 'Salsa'],
+    instructions: ['Form and cook masa cakes', 'Fry until crispy', 'Top with beans and toppings']
+  },
+  {
+    name: "Tostadas",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Corn tortillas', 'Refried beans', 'Meat', 'Lettuce', 'Cheese', 'Toppings'],
+    instructions: ['Fry tortillas until crispy', 'Layer with beans, meat, and toppings']
+  },
+  {
+    name: "Churros",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Water', 'Butter', 'Flour', 'Eggs', 'Cinnamon sugar'],
+    instructions: ['Boil water and butter', 'Add flour', 'Beat in eggs', 'Pipe and fry', 'Roll in cinnamon sugar']
+  },
+  {
+    name: "Huevos Rancheros",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Tortillas', 'Eggs', 'Refried beans', 'Salsa', 'Cheese', 'Avocado'],
+    instructions: ['Fry tortillas lightly', 'Top with beans and fried eggs', 'Add salsa and toppings']
+  },
+  {
+    name: "Chilaquiles",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Tortilla chips', 'Salsa', 'Cheese', 'Crema', 'Onion'],
+    instructions: ['Fry tortilla pieces', 'Toss in warm salsa', 'Top with cheese and crema']
+  },
+  {
+    name: "Pico de Gallo",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Tomatoes', 'Onion', 'Jalapeño', 'Cilantro', 'Lime'],
+    instructions: ['Dice all ingredients', 'Mix with lime and salt', 'Let sit to meld flavors']
+  },
+  {
+    name: "Nachos",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Tortilla chips', 'Cheese', 'Ground beef', 'Beans', 'Toppings'],
+    instructions: ['Layer chips with beans, meat, cheese', 'Bake until cheese melts', 'Add fresh toppings']
+  },
+  {
+    name: "Molletes",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Bolillo rolls', 'Refried beans', 'Cheese', 'Pico de gallo'],
+    instructions: ['Spread beans on rolls', 'Top with cheese', 'Bake until melted', 'Add pico']
+  },
+  {
+    name: "Horchata",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Rice', 'Water', 'Sugar', 'Vanilla', 'Cinnamon'],
+    instructions: ['Soak rice overnight', 'Blend and strain', 'Add sugar and flavorings', 'Chill']
+  },
+  {
+    name: "Empanadas",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Dough', 'Ground beef', 'Potatoes', 'Spices'],
+    instructions: ['Make dough', 'Fill with seasoned meat mixture', 'Fold and seal', 'Bake']
+  },
+  {
+    name: "Ceviche",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['White fish', 'Lime juice', 'Tomato', 'Onion', 'Cilantro', 'Avocado'],
+    instructions: ['Marinate fish in lime 1 hour', 'Mix with vegetables', 'Add avocado', 'Serve cold']
+  },
+  {
+    name: "Arroz con Leche",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Rice', 'Milk', 'Condensed milk', 'Cinnamon', 'Vanilla'],
+    instructions: ['Cook rice in milk', 'Add condensed milk', 'Flavor with cinnamon and vanilla', 'Serve warm or cold']
+  },
+  {
+    name: "Flautas",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Tortillas', 'Shredded chicken', 'Oil', 'Toppings'],
+    instructions: ['Fill tortillas with chicken', 'Roll tightly', 'Fry until crispy', 'Top with lettuce, cream, cheese']
+  },
+  {
+    name: "Tortas",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Bolillo rolls', 'Meat', 'Beans', 'Avocado', 'Lettuce', 'Tomato', 'Cheese'],
+    instructions: ['Layer all ingredients on roll', 'Press and serve']
+  },
+  {
+    name: "Queso Dip",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Velveeta', 'Tomatoes with chiles', 'Ground beef', 'Milk'],
+    instructions: ['Melt cheese with tomatoes and milk', 'Add cooked seasoned beef', 'Keep warm']
+  },
+  {
+    name: "Mexican Hot Chocolate",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Milk', 'Mexican chocolate', 'Cinnamon', 'Cayenne'],
+    instructions: ['Heat milk', 'Whisk in chocolate', 'Add spices', 'Froth and serve']
+  },
+  {
+    name: "Cochinita Pibil",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Pork', 'Achiote paste', 'Orange juice', 'Lime', 'Garlic'],
+    instructions: ['Marinate pork overnight', 'Wrap and roast 3-4 hours', 'Shred', 'Serve in tortillas']
+  },
+  {
+    name: "Birria Tacos",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Beef or goat', 'Dried chiles', 'Spices', 'Tortillas', 'Cheese'],
+    instructions: ['Stew meat in spiced broth 3-4 hours', 'Dip tortillas in fat', 'Fill and fry', 'Serve with broth']
+  },
+  {
+    name: "Tres Leches Cake",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Cake', 'Evaporated milk', 'Condensed milk', 'Heavy cream', 'Whipped topping'],
+    instructions: ['Bake cake', 'Poke holes', 'Pour three milk mixture over', 'Chill', 'Top with whipped cream']
+  },
+  {
+    name: "Flan",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Eggs', 'Condensed milk', 'Evaporated milk', 'Vanilla', 'Sugar for caramel'],
+    instructions: ['Make caramel in pan', 'Blend custard ingredients', 'Pour over caramel', 'Bake in water bath', 'Chill and invert']
+  },
+  {
+    name: "Esquites",
+    cuisine: "mexican",
+    image: "https://via.placeholder.com/800x300/E67E22/FFFFFF?text=Mexican+Cuisine",
+    ingredients: ['Corn kernels', 'Mayo', 'Cotija cheese', 'Lime', 'Chili powder'],
+    instructions: ['Cook corn', 'Mix with mayo, cheese, lime', 'Sprinkle chili powder', 'Serve in cups']
+  },
+  {
+    name: "Chicken Fried Rice",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Rice', 'Chicken', 'Eggs', 'Vegetables', 'Soy sauce', 'Sesame oil'],
+    instructions: ['Cook chicken', 'Scramble eggs', 'Stir-fry vegetables', 'Add rice and sauces', 'Mix everything']
+  },
+  {
+    name: "Beef and Broccoli",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Beef', 'Broccoli', 'Soy sauce', 'Oyster sauce', 'Garlic', 'Ginger'],
+    instructions: ['Stir-fry beef', 'Cook broccoli', 'Make sauce', 'Combine and serve over rice']
+  },
+  {
+    name: "Lo Mein",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Noodles', 'Vegetables', 'Soy sauce', 'Sesame oil', 'Garlic'],
+    instructions: ['Cook noodles', 'Stir-fry vegetables', 'Toss with noodles and sauces']
+  },
+  {
+    name: "Pad Thai",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Rice noodles', 'Shrimp or chicken', 'Eggs', 'Fish sauce', 'Tamarind', 'Peanuts'],
+    instructions: ['Soak noodles', 'Cook protein', 'Scramble eggs', 'Toss everything with sauce', 'Top with peanuts']
+  },
+  {
+    name: "Orange Chicken",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Chicken', 'Cornstarch', 'Orange juice', 'Soy sauce', 'Sugar', 'Garlic'],
+    instructions: ['Fry breaded chicken', 'Make orange sauce', 'Toss chicken in sauce']
+  },
+  {
+    name: "Chicken Teriyaki",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Chicken', 'Soy sauce', 'Mirin', 'Sugar', 'Garlic', 'Ginger'],
+    instructions: ['Marinate chicken', 'Cook until done', 'Glaze with teriyaki sauce']
+  },
+  {
+    name: "Spring Rolls",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Wrappers', 'Ground pork', 'Cabbage', 'Carrot', 'Soy sauce'],
+    instructions: ['Cook filling', 'Wrap in spring roll wrappers', 'Fry until golden']
+  },
+  {
+    name: "Pork Dumplings",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Ground pork', 'Cabbage', 'Ginger', 'Soy sauce', 'Dumpling wrappers'],
+    instructions: ['Mix filling', 'Wrap dumplings', 'Pan-fry then steam']
+  },
+  {
+    name: "Ramen",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Ramen noodles', 'Broth', 'Pork or chicken', 'Soft-boiled eggs', 'Green onions'],
+    instructions: ['Make rich broth', 'Cook noodles', 'Assemble with toppings']
+  },
+  {
+    name: "Kung Pao Chicken",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Chicken', 'Peanuts', 'Dried chiles', 'Soy sauce', 'Vinegar', 'Sugar'],
+    instructions: ['Stir-fry chicken', 'Add vegetables and peanuts', 'Toss in sauce']
+  },
+  {
+    name: "Sweet and Sour Pork",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Pork', 'Pineapple', 'Bell pepper', 'Ketchup', 'Vinegar', 'Sugar'],
+    instructions: ['Fry breaded pork', 'Make sweet and sour sauce', 'Combine with vegetables']
+  },
+  {
+    name: "Egg Drop Soup",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Broth', 'Eggs', 'Cornstarch', 'Green onions', 'Sesame oil'],
+    instructions: ['Thicken broth', 'Drizzle in beaten eggs while stirring', 'Season']
+  },
+  {
+    name: "Mongolian Beef",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Beef', 'Soy sauce', 'Brown sugar', 'Ginger', 'Garlic', 'Green onions'],
+    instructions: ['Fry breaded beef', 'Make sauce', 'Toss together']
+  },
+  {
+    name: "Pho",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Beef bones', 'Rice noodles', 'Beef slices', 'Star anise', 'Ginger', 'Fish sauce', 'Herbs'],
+    instructions: ['Simmer broth 8 hours', 'Cook noodles', 'Pour hot broth over raw beef and noodles']
+  },
+  {
+    name: "Bibimbap",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Rice', 'Beef', 'Vegetables', 'Egg', 'Gochujang', 'Sesame oil'],
+    instructions: ['Cook all components separately', 'Arrange over rice', 'Top with egg', 'Mix with gochujang']
+  },
+  {
+    name: "General Tso's Chicken",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Chicken', 'Dried chiles', 'Soy sauce', 'Vinegar', 'Sugar', 'Garlic'],
+    instructions: ['Fry breaded chicken', 'Make spicy-sweet sauce', 'Toss together']
+  },
+  {
+    name: "Mapo Tofu",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Tofu', 'Ground pork', 'Chili bean paste', 'Soy sauce', 'Garlic', 'Ginger'],
+    instructions: ['Cook pork with seasonings', 'Add tofu gently', 'Simmer in sauce']
+  },
+  {
+    name: "Shrimp Tempura",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Shrimp', 'Tempura batter', 'Oil for frying', 'Dipping sauce'],
+    instructions: ['Make light batter', 'Dip shrimp', 'Fry until crispy', 'Serve with sauce']
+  },
+  {
+    name: "Chow Mein",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Noodles', 'Chicken or pork', 'Cabbage', 'Carrot', 'Soy sauce', 'Oyster sauce'],
+    instructions: ['Cook noodles', 'Stir-fry meat and vegetables', 'Toss everything together']
+  },
+  {
+    name: "California Roll",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Sushi rice', 'Nori', 'Imitation crab', 'Avocado', 'Cucumber'],
+    instructions: ['Spread rice on nori', 'Add fillings', 'Roll tightly', 'Slice']
+  },
+  {
+    name: "Thai Basil Chicken",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Ground chicken', 'Thai basil', 'Chiles', 'Fish sauce', 'Oyster sauce', 'Garlic'],
+    instructions: ['Stir-fry chicken with aromatics', 'Add sauces', 'Finish with basil']
+  },
+  {
+    name: "Korean Bulgogi",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Beef', 'Soy sauce', 'Sugar', 'Sesame oil', 'Garlic', 'Ginger', 'Pear'],
+    instructions: ['Marinate beef', 'Grill or pan-fry quickly', 'Serve with lettuce wraps']
+  },
+  {
+    name: "Miso Soup",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Dashi', 'Miso paste', 'Tofu', 'Seaweed', 'Green onions'],
+    instructions: ['Heat dashi', 'Dissolve miso', 'Add tofu and seaweed']
+  },
+  {
+    name: "Chicken Satay",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Chicken', 'Curry powder', 'Coconut milk', 'Peanut sauce'],
+    instructions: ['Marinate chicken', 'Skewer and grill', 'Serve with peanut sauce']
+  },
+  {
+    name: "Banh Mi",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Baguette', 'Pork', 'Pickled vegetables', 'Cilantro', 'Cucumber', 'Jalapeño'],
+    instructions: ['Grill pork', 'Layer all ingredients in bread']
+  },
+  {
+    name: "Yakitori",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Chicken', 'Soy sauce', 'Mirin', 'Sake', 'Sugar', 'Green onions'],
+    instructions: ['Skewer chicken with green onions', 'Grill while basting with sauce']
+  },
+  {
+    name: "Tom Yum Soup",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Shrimp', 'Lemongrass', 'Galangal', 'Lime leaves', 'Fish sauce', 'Lime', 'Chiles'],
+    instructions: ['Simmer aromatics in broth', 'Add shrimp and mushrooms', 'Season with fish sauce and lime']
+  },
+  {
+    name: "Dan Dan Noodles",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Noodles', 'Ground pork', 'Sesame paste', 'Soy sauce', 'Chili oil', 'Garlic'],
+    instructions: ['Cook noodles', 'Make spicy sesame sauce', 'Brown pork', 'Combine']
+  },
+  {
+    name: "Szechuan Green Beans",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Green beans', 'Ground pork', 'Garlic', 'Ginger', 'Chili paste', 'Soy sauce'],
+    instructions: ['Blister green beans in hot wok', 'Add pork and seasonings', 'Toss together']
+  },
+  {
+    name: "Hainanese Chicken Rice",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Whole chicken', 'Rice', 'Ginger', 'Garlic', 'Cucumber', 'Dipping sauces'],
+    instructions: ['Poach chicken', 'Cook rice in chicken fat and broth', 'Slice chicken over rice']
+  },
+  {
+    name: "Gyoza",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Ground pork', 'Cabbage', 'Gyoza wrappers', 'Soy sauce', 'Sesame oil', 'Ginger'],
+    instructions: ['Mix filling', 'Wrap gyoza', 'Pan-fry then steam']
+  },
+  {
+    name: "Pad See Ew",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Wide rice noodles', 'Chicken or beef', 'Chinese broccoli', 'Dark soy sauce', 'Eggs'],
+    instructions: ['Stir-fry meat', 'Add noodles and soy sauce', 'Scramble eggs', 'Add vegetables']
+  },
+  {
+    name: "Mango Sticky Rice",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Glutinous rice', 'Coconut milk', 'Sugar', 'Mango'],
+    instructions: ['Steam rice', 'Mix with sweetened coconut milk', 'Serve with sliced mango']
+  },
+  {
+    name: "Sesame Chicken",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Chicken', 'Cornstarch', 'Honey', 'Soy sauce', 'Sesame oil', 'Sesame seeds'],
+    instructions: ['Fry breaded chicken', 'Make honey-sesame sauce', 'Toss and garnish with seeds']
+  },
+  {
+    name: "Hot and Sour Soup",
+    cuisine: "asian",
+    image: "https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=Asian+Cuisine",
+    ingredients: ['Broth', 'Pork', 'Tofu', 'Mushrooms', 'Vinegar', 'White pepper', 'Eggs'],
+    instructions: ['Simmer all ingredients', 'Thicken', 'Drizzle in eggs', 'Season with vinegar and pepper']
+  },
+];
+
+
+let dishRatings = JSON.parse(localStorage.getItem('dishRatings')) || {};
+
+function generateRandomDish() {
+    const randomIndex = Math.floor(Math.random() * dishes.length);
+    const dish = dishes[randomIndex];
+    
+    document.getElementById('cuisineTag').textContent = dish.cuisine.toUpperCase();
+    document.getElementById('cuisineTag').className = 'cuisine-tag ' + dish.cuisine;
+    document.getElementById('dishName').textContent = dish.name;
+    
+    // Set image with error handling
+    const dishImage = document.getElementById('dishImage');
+    dishImage.src = dish.image;
+    dishImage.onerror = function() {
+        // If image fails to load, use a colored placeholder based on cuisine
+        const colors = {
+            american: 'https://via.placeholder.com/800x300/4A90E2/FFFFFF?text=' + encodeURIComponent(dish.name),
+            mexican: 'https://via.placeholder.com/800x300/E67E22/FFFFFF?text=' + encodeURIComponent(dish.name),
+            asian: 'https://via.placeholder.com/800x300/9B59B6/FFFFFF?text=' + encodeURIComponent(dish.name)
+        };
+        this.src = colors[dish.cuisine] || 'https://via.placeholder.com/800x300/CCCCCC/FFFFFF?text=' + encodeURIComponent(dish.name);
+        this.onerror = null; // Prevent infinite loop
+    };
+    
+    const ingredientsList = document.getElementById('ingredientsList');
+    ingredientsList.innerHTML = '';
+    dish.ingredients.forEach(ingredient => {
+        const li = document.createElement('li');
+        li.textContent = ingredient;
+        ingredientsList.appendChild(li);
+    });
+    
+    const instructionsList = document.getElementById('instructionsList');
+    instructionsList.innerHTML = '';
+    dish.instructions.forEach(instruction => {
+        const li = document.createElement('li');
+        li.textContent = instruction;
+        instructionsList.appendChild(li);
+    });
+    
+    document.getElementById('dishDisplay').style.display = 'block';
+    document.getElementById('dishDisplay').scrollIntoView({ behavior: 'smooth' });
+    
+    loadRating(dish.name);
+}
+
+function loadRating(dishName) {
+    const rating = dishRatings[dishName];
+    const stars = document.querySelectorAll('.star');
+    stars.forEach(star => star.classList.remove('active'));
+    
+    if (rating) {
+        for (let i = 0; i < rating.rating; i++) {
+            stars[i].classList.add('active');
+        }
+        document.getElementById('ratingDisplay').textContent = 
+            `Your rating: ${rating.rating} out of 5 stars`;
+        document.getElementById('ratingCount').textContent = 
+            `Rated on ${new Date(rating.date).toLocaleDateString()}`;
+    } else {
+        document.getElementById('ratingDisplay').textContent = 'Click stars to rate';
+        document.getElementById('ratingCount').textContent = '';
+    }
+}
+
+function saveRating(dishName, rating) {
+    dishRatings[dishName] = {
+        rating: rating,
+        date: new Date().toISOString()
+    };
+    localStorage.setItem('dishRatings', JSON.stringify(dishRatings));
+    loadRating(dishName);
+}
+
+// Print function
+function printRecipe() {
+    window.print();
+}
+
+// Event listeners
+document.getElementById('generateBtn').addEventListener('click', generateRandomDish);
+document.getElementById('printBtn').addEventListener('click', printRecipe);
+
+document.querySelectorAll('.star').forEach(star => {
+    star.addEventListener('click', function() {
+        const rating = parseInt(this.getAttribute('data-rating'));
+        const dishName = document.getElementById('dishName').textContent;
+        if (dishName) {
+            saveRating(dishName, rating);
+        }
+    });
+    
+    star.addEventListener('mouseenter', function() {
+        const rating = parseInt(this.getAttribute('data-rating'));
+        const stars = document.querySelectorAll('.star');
+        stars.forEach((s, index) => {
+            s.style.color = index < rating ? '#ffd700' : '#ddd';
+        });
+    });
+});
+
+document.getElementById('starRating').addEventListener('mouseleave', function() {
+    const dishName = document.getElementById('dishName').textContent;
+    if (dishName) {
+        loadRating(dishName);
+    }
+});
+
+    </script>
+</body>
+</html>
